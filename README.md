@@ -2,7 +2,7 @@
 
 A Streamlit-based dashboard for monitoring and controlling NeoHub heating systems. This application provides a user-friendly interface for managing multiple NeoHub devices, zones, and power sockets.
 
-![alt text](image.png)
+![Dashboard Screenshot](image.png)
 
 ## System Architecture
 
