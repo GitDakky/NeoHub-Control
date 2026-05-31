@@ -96,9 +96,10 @@ def test_bridge_publishes_climate_discovery_and_state_for_thermostat_zone():
     discovery_topic = f"homeassistant/climate/{object_id}/config"
     discovery = payload_for(fake_mqtt, discovery_topic)
 
-    assert discovery["name"] == "Kitchen UFH"
-    assert discovery["unique_id"] == object_id
-    assert discovery["device"]["via_device"] == "neohub_hub_hub-1"
+    assert discovery["name"] is None
+    assert discovery["device"]["name"] == "NeoHub Kitchen UFH"
+    assert discovery["unique_id"] == f"neohub_mqtt_v2_{object_id}"
+    assert discovery["device"]["via_device"] == "neohub_mqtt_v2_hub_hub-1"
     assert discovery["current_temperature_topic"] == f"neohub/{object_id}/current_temperature"
     assert discovery["temperature_state_topic"] == f"neohub/{object_id}/target_temperature"
     assert discovery["temperature_command_topic"] == f"neohub/{object_id}/set_temperature"
@@ -133,8 +134,9 @@ def test_bridge_publishes_switch_discovery_for_socket_zone():
     object_id = "neohub_main_hub_garden_socket_hub_1"
     discovery = payload_for(fake_mqtt, f"homeassistant/switch/{object_id}/config")
 
-    assert discovery["name"] == "Garden Socket"
-    assert discovery["unique_id"] == object_id
+    assert discovery["name"] is None
+    assert discovery["device"]["name"] == "NeoHub Garden Socket"
+    assert discovery["unique_id"] == f"neohub_mqtt_v2_{object_id}"
     assert discovery["state_topic"] == f"neohub/{object_id}/state"
     assert discovery["command_topic"] == f"neohub/{object_id}/set_mode"
     assert payload_for(fake_mqtt, f"neohub/{object_id}/state") == "OFF"
@@ -199,8 +201,8 @@ def test_multi_hub_duplicate_names_do_not_collide_and_route_commands_to_correct_
 
     first = "neohub_shared_hub_kitchen_hub_1"
     second = "neohub_shared_hub_kitchen_hub_2"
-    assert payload_for(fake_mqtt, f"homeassistant/climate/{first}/config")["unique_id"] == first
-    assert payload_for(fake_mqtt, f"homeassistant/climate/{second}/config")["unique_id"] == second
+    assert payload_for(fake_mqtt, f"homeassistant/climate/{first}/config")["unique_id"] == f"neohub_mqtt_v2_{first}"
+    assert payload_for(fake_mqtt, f"homeassistant/climate/{second}/config")["unique_id"] == f"neohub_mqtt_v2_{second}"
 
     bridge.handle_message(f"neohub/{first}/set_temperature", "20.5")
     bridge.handle_message(f"neohub/{second}/set_temperature", "22")
@@ -225,7 +227,8 @@ def test_zone_and_room_mapping_are_published_as_device_metadata_and_attributes()
     discovery = payload_for(fake_mqtt, f"homeassistant/climate/{object_id}/config")
     attrs = payload_for(fake_mqtt, f"neohub/{object_id}/attributes")
 
-    assert discovery["name"] == "Kitchen (Kitchen UFH)"
+    assert discovery["name"] is None
+    assert discovery["device"]["name"] == "NeoHub Kitchen (Kitchen UFH)"
     assert discovery["device"]["suggested_area"] == "Kitchen"
     assert attrs["property_name"] == "Longueville Hall"
     assert attrs["property_zone"] == "Family Zone"

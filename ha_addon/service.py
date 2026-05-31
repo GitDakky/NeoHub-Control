@@ -321,8 +321,8 @@ class NeoHubMQTTBridge:
     def _publish_climate_discovery(self, binding: ZoneBinding, device: Any, zone: Any) -> None:
         topic_prefix = self._topic(binding.object_id)
         discovery = {
-            "name": self._friendly_entity_name(binding),
-            "unique_id": binding.object_id,
+            "name": None,
+            "unique_id": self._entity_unique_id(binding.object_id),
             "object_id": binding.object_id,
             "device": self._zone_device_info(binding, device, zone),
             "availability_topic": f"{topic_prefix}/availability",
@@ -349,8 +349,8 @@ class NeoHubMQTTBridge:
     def _publish_switch_discovery(self, binding: ZoneBinding, device: Any, zone: Any) -> None:
         topic_prefix = self._topic(binding.object_id)
         discovery = {
-            "name": self._friendly_entity_name(binding),
-            "unique_id": binding.object_id,
+            "name": None,
+            "unique_id": self._entity_unique_id(binding.object_id),
             "object_id": binding.object_id,
             "device": self._zone_device_info(binding, device, zone),
             "availability_topic": f"{topic_prefix}/availability",
@@ -407,7 +407,7 @@ class NeoHubMQTTBridge:
         topic = f"{self._topic(binding.object_id)}/{key}"
         payload: dict[str, Any] = {
             "name": f"{self._friendly_entity_name(binding)} {key.replace('_', ' ').title()}",
-            "unique_id": object_id,
+            "unique_id": self._entity_unique_id(object_id),
             "object_id": object_id,
             "device": self._zone_device_info(binding, device, zone),
             "availability_topic": f"{self._topic(binding.object_id)}/availability",
@@ -426,7 +426,7 @@ class NeoHubMQTTBridge:
         topic = f"{self._topic(binding.object_id)}/{key}"
         payload: dict[str, Any] = {
             "name": f"{self._friendly_entity_name(binding)} {key.replace('_', ' ').title()}",
-            "unique_id": object_id,
+            "unique_id": self._entity_unique_id(object_id),
             "object_id": object_id,
             "device": self._zone_device_info(binding, device, zone),
             "availability_topic": f"{self._topic(binding.object_id)}/availability",
@@ -444,8 +444,8 @@ class NeoHubMQTTBridge:
         object_id = self._hub_object_id(device)
         topic_prefix = f"{self.base_topic}/{object_id}"
         payload = {
-            "name": f"{getattr(device, 'devicename', 'NeoHub')} Online",
-            "unique_id": f"{object_id}_online",
+            "name": "Online",
+            "unique_id": self._entity_unique_id(f"{object_id}_online"),
             "object_id": f"{object_id}_online",
             "device": self._hub_device_info(device),
             "state_topic": f"{topic_prefix}/availability",
@@ -480,12 +480,15 @@ class NeoHubMQTTBridge:
         device_id = slugify(str(getattr(device, "deviceid", device_name)))
         return f"neohub_{device_name}_{zone_name and slugify(zone_name)}_{device_id[-8:]}"
 
+    def _entity_unique_id(self, object_id: str) -> str:
+        return f"neohub_mqtt_v2_{object_id}"
+
     def _hub_device_info(self, device: Any) -> dict[str, Any]:
         device_id = str(getattr(device, "deviceid", slugify(str(getattr(device, "devicename", "device")))))
         hub_zone = self.mapping.hub_zone_for(device)
         info: dict[str, Any] = {
-            "identifiers": [f"neohub_hub_{device_id}"],
-            "name": getattr(device, "devicename", "NeoHub"),
+            "identifiers": [f"neohub_mqtt_v2_hub_{device_id}"],
+            "name": f"NeoHub {getattr(device, 'devicename', 'Hub')}",
             "manufacturer": "Heatmiser",
             "model": getattr(device, "type", "NeoHub"),
             "sw_version": str(getattr(device, "version", "")),
@@ -497,11 +500,11 @@ class NeoHubMQTTBridge:
     def _zone_device_info(self, binding: ZoneBinding, device: Any, zone: Any) -> dict[str, Any]:
         zone_identifier = _zone_get(zone, "DEVICE_ID") or binding.zone_name
         info: dict[str, Any] = {
-            "identifiers": [f"neohub_point_{binding.device_id}_{slugify(str(zone_identifier))}"],
-            "name": self._friendly_entity_name(binding),
+            "identifiers": [f"neohub_mqtt_v2_point_{binding.device_id}_{slugify(str(zone_identifier))}"],
+            "name": f"NeoHub {self._friendly_entity_name(binding)}",
             "manufacturer": "Heatmiser",
             "model": self._zone_model(zone),
-            "via_device": f"neohub_hub_{binding.device_id}",
+            "via_device": f"neohub_mqtt_v2_hub_{binding.device_id}",
         }
         if binding.room:
             info["suggested_area"] = binding.room
