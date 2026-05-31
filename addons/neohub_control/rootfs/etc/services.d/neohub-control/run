@@ -1,0 +1,17 @@
+#!/usr/bin/with-contenv bashio
+set -euo pipefail
+
+if bashio::services.available "mqtt"; then
+    export MQTT_HOST="$(bashio::services 'mqtt' 'host')"
+    export MQTT_PORT="$(bashio::services 'mqtt' 'port')"
+    export MQTT_USERNAME="$(bashio::services 'mqtt' 'username')"
+    export MQTT_PASSWORD="$(bashio::services 'mqtt' 'password')"
+    export MQTT_SSL="$(bashio::services 'mqtt' 'ssl')"
+    export MQTT_PROTOCOL="$(bashio::services 'mqtt' 'protocol')"
+    bashio::log.info "Using Supervisor MQTT service at ${MQTT_HOST}:${MQTT_PORT}"
+else
+    bashio::log.warning "Supervisor MQTT service is not available yet; Python bridge will retry/fallback."
+fi
+
+cd /opt/neohub-control
+exec /opt/neohub-control/venv/bin/python -m ha_addon.service

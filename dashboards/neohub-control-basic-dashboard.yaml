@@ -1,0 +1,57 @@
+# NeoHub Control Zero-Dependency Dashboard
+#
+# This dashboard uses only built-in Home Assistant cards.
+# Replace the example entity IDs with your generated NeoHub entities.
+
+title: NeoHub Control
+path: neohub-control-basic
+icon: mdi:radiator
+views:
+  - title: Heating
+    path: heating
+    icon: mdi:home-thermometer-outline
+    cards:
+      - type: markdown
+        content: |
+          # 🔥 NeoHub Control
+
+          Your Heatmiser NeoHub heating estate, surfaced through MQTT Discovery.
+
+          Replace the example entity IDs below with your discovered `climate.neohub_*`, `switch.neohub_*`, `sensor.neohub_*`, and `binary_sensor.neohub_*` entities.
+
+      - type: thermostat
+        entity: climate.neohub_main_hub_kitchen_ufh_hub_1
+        name: Kitchen UFH
+
+      - type: entities
+        title: Climate Zones
+        show_header_toggle: false
+        entities:
+          - climate.neohub_main_hub_kitchen_ufh_hub_1
+          - climate.neohub_main_hub_lounge_hub_1
+          - climate.neohub_main_hub_bedroom_hub_1
+
+      - type: history-graph
+        title: Temperature History
+        hours_to_show: 24
+        entities:
+          - entity: climate.neohub_main_hub_kitchen_ufh_hub_1
+            name: Kitchen UFH
+          - entity: climate.neohub_main_hub_lounge_hub_1
+            name: Lounge
+
+      - type: entities
+        title: Socket Zones
+        show_header_toggle: false
+        entities:
+          - switch.neohub_main_hub_garden_socket_hub_1
+          - switch.neohub_main_hub_utility_socket_hub_1
+
+      - type: entities
+        title: Diagnostics
+        show_header_toggle: false
+        entities:
+          - sensor.neohub_main_hub_kitchen_ufh_hub_1_floor_temperature
+          - sensor.neohub_main_hub_kitchen_ufh_hub_1_modulation_level
+          - binary_sensor.neohub_main_hub_kitchen_ufh_hub_1_window_open
+          - binary_sensor.neohub_main_hub_kitchen_ufh_hub_1_low_battery

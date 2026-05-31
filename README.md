@@ -1,199 +1,389 @@
-# NeoHub Control Dashboard
+<p align="center">
+  <img src="assets/neohub-control-hero.svg" alt="NeoHub Control Home Assistant animated header" width="100%" />
+</p>
 
-A Streamlit-based dashboard for monitoring and controlling NeoHub heating systems. This application provides a user-friendly interface for managing multiple NeoHub devices, zones, and power sockets.
+<p align="center">
+  <a href="https://github.com/GitDakky/neohub-control-home-assistant"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-GitDakky%2Fneohub--control--home--assistant-111827?style=for-the-badge&logo=github&logoColor=white"></a>
+  <img alt="Home Assistant" src="https://img.shields.io/badge/Home%20Assistant-Add--on-18BCF2?style=for-the-badge&logo=homeassistant&logoColor=white">
+  <img alt="MQTT Discovery" src="https://img.shields.io/badge/MQTT-Discovery-660066?style=for-the-badge&logo=mqtt&logoColor=white">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-34D399?style=for-the-badge">
+</p>
 
-![Dashboard Screenshot](image.png)
+# NeoHub Control for Home Assistant
 
-## System Architecture
+A standalone Home Assistant add-on repository for Heatmiser NeoHub heating systems.
+
+NeoHub Control turns Heatmiser NeoHub into a proper Home Assistant citizen: cloud login, live zone telemetry, MQTT Discovery, thermostat control, socket control, diagnostic attributes, and a dashboard that looks like it belongs in a mission-control room rather than a boiler cupboard.
+
+It uses the same NeoHub cloud method proven by the original Python project:
+
+- `hm_user_login` for login and device discovery
+- `hm_cache_value` for live heating state
+- `hm_set_temp` for temperature commands
+- `hm_set_mode` for mode and socket-style commands
+
+The result: your Heatmiser estate becomes discoverable `climate.*` and `switch.*` entities in Home Assistant, ready for dashboards, automations, voice assistants, energy workflows, and sane operational visibility.
+
+---
+
+## Why this exists
+
+Heating is infrastructure. It should be observable, scriptable, automatable, and beautiful.
+
+NeoHub Control is for people who want more than a vendor app:
+
+- Landlords and estate operators managing many heating zones
+- Smart-home builders who want Home Assistant-native climate entities
+- Engineers who want MQTT topics they can inspect, replay, automate, and trust
+- Anyone who wants Heatmiser visibility without staring at a phone app
+
+---
+
+## Highlights
+
+### Home Assistant add-on repository
+
+- Add this repository directly to the Home Assistant Add-on Store
+- Runs inside Home Assistant OS / Supervised as an add-on
+- Uses MQTT Discovery to create Home Assistant entities automatically
+- Supports multi-architecture builds: `aarch64`, `amd64`, `armhf`, `armv7`, `i386`
+- Reads configuration from the standard add-on `/data/options.json`
+- Uses the Mosquitto add-on by default at `core-mosquitto:1883`
+
+### Climate + socket entities
+
+- Thermostat-like zones become MQTT `climate` entities
+- Socket-like zones become MQTT `switch` entities
+- Stable object IDs based on hub and zone name
+- Retained availability, state, and discovery topics
+
+### Real control path
+
+Commands from Home Assistant are routed back to the NeoHub API:
+
+- Set target temperature from Home Assistant
+- Change mode: heat, cool, fan-only/vent, off
+- Toggle socket-like zones through the mode command path
+
+### Rich telemetry
+
+The bridge publishes:
+
+- Current temperature
+- Target temperature
+- HVAC mode
+- Heating action
+- Humidity
+- Availability
+- Window-open attribute
+- Low-battery attribute
+- Timer status
+- Modulation level
+
+### Premium dashboard included
+
+This repository includes two dashboard templates:
+
+- `dashboards/neohub-control-premium-dashboard.yaml`
+  - Premium Home Assistant dashboard using Mushroom, Auto Entities, and ApexCharts
+  - Auto-populates `climate.neohub_*` and `switch.neohub_*` entities
+  - Includes a 24-hour temperature intelligence view
+
+- `dashboards/neohub-control-basic-dashboard.yaml`
+  - Zero-dependency Lovelace dashboard using only built-in cards
+  - Good for clean installs or conservative systems
+
+---
+
+## Architecture
 
 ```mermaid
-graph TD
-    A[User] -->|Login| B[Streamlit Dashboard]
-    B -->|API Requests| C[NeoHub API]
-    C -->|Device Data| B
-    B -->|Display| D[Zone Control]
-    B -->|Display| E[Matrix View]
-    B -->|Display| F[Data Export]
-    B -->|Display| G[System Overview]
-    
-    subgraph Devices
-        C -->|Control| H[Thermostats]
-        C -->|Control| I[Power Sockets]
-    end
-    
-    subgraph Data Processing
-        B -->|Process| J[Temperature Data]
-        B -->|Process| K[Status Updates]
-        B -->|Generate| L[Alerts]
-        B -->|Export| M[CSV/Excel]
-    end
+flowchart LR
+    HA[Home Assistant] -->|MQTT Discovery| MQTT[(MQTT Broker)]
+    MQTT -->|command topics| ADDON[NeoHub Control Add-on]
+    ADDON -->|hm_user_login| CLOUD[Heatmiser NeoHub Cloud]
+    ADDON -->|hm_cache_value| CLOUD
+    ADDON -->|hm_set_temp / hm_set_mode| CLOUD
+    CLOUD --> HUB[NeoHub]
+    HUB --> ZONES[Thermostats + Sockets]
+    ADDON -->|state topics| MQTT
+    MQTT -->|climate/switch entities| HA
 ```
 
-## Component Architecture
+The add-on is intentionally MQTT-native. MQTT Discovery is the cleanest way for an add-on to create Home Assistant climate and switch entities without writing and maintaining a separate Home Assistant custom integration.
 
-```mermaid
-classDiagram
-    class NeoHub {
-        +login()
-        +get_data()
-        +set_temperature()
-        +set_mode()
-        +set_away_mode()
-        +get_history()
-    }
-    
-    class Device {
-        +deviceid
-        +devicename
-        +online
-        +type
-        +version
-    }
-    
-    class Zone {
-        +ZONE_NAME
-        +ACTUAL_TEMP
-        +SET_TEMP
-        +HEAT_ON
-        +HEAT_MODE
-        +RELATIVE_HUMIDITY
-    }
-    
-    class Dashboard {
-        +ZoneControl
-        +MatrixView
-        +DataExport
-        +SystemOverview
-    }
+---
 
-    Dashboard --> NeoHub : Uses
-    NeoHub --> Device : Controls
-    Device --> Zone : Contains
-    Dashboard --> Zone : Displays
+## Repository layout
+
+```text
+.
+├── repository.yaml                  # Home Assistant add-on repository manifest
+├── addons/
+│   └── neohub_control/              # Home Assistant add-on
+│       ├── config.yaml              # Add-on manifest and options schema
+│       ├── Dockerfile               # Add-on container image
+│       ├── DOCS.md                  # Add-on documentation
+│       ├── README.md                # Add-on store summary
+│       ├── rootfs/                  # s6 service runner
+│       └── app/                     # Code copied into the add-on image
+├── assets/
+│   └── neohub-control-hero.svg      # Animated project header
+├── dashboards/
+│   ├── neohub-control-premium-dashboard.yaml
+│   └── neohub-control-basic-dashboard.yaml
+├── ha_addon/                        # Testable add-on bridge source
+├── neohub/                          # NeoHub API wrapper
+├── tests/                           # MQTT bridge tests
+└── requirements.txt                 # Local development requirements
 ```
 
-## Data Flow
+---
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant D as Dashboard
-    participant A as NeoHub API
-    participant T as Thermostats
-    participant S as Sockets
+## Installing in Home Assistant
 
-    U->>D: Login
-    D->>A: Authenticate
-    A->>D: Return Token
-    
-    loop Every Update
-        D->>A: Request Device Status
-        A->>T: Poll Thermostats
-        A->>S: Poll Sockets
-        T->>A: Temperature Data
-        S->>A: Power Status
-        A->>D: Device Data
-        D->>U: Update Display
-    end
+### 1. Add this repository
 
-    U->>D: Control Action
-    D->>A: Send Command
-    A->>T: Update Settings
-    A->>S: Update Settings
-    A->>D: Confirm Changes
-    D->>U: Show Result
+In Home Assistant:
+
+1. Go to Settings → Add-ons → Add-on Store
+2. Open the three-dot menu
+3. Choose Repositories
+4. Add:
+
+```text
+https://github.com/GitDakky/neohub-control-home-assistant
 ```
 
-## Features
+5. Refresh the add-on store
+6. Install `NeoHub Control`
 
-- **Zone Control**
-  - Temperature monitoring and control
-  - Mode selection (Heat/Cool/Vent)
-  - Real-time status updates
-  - Support for both thermostats and power sockets
+### 2. Enable MQTT
 
-- **Matrix View**
-  - Comprehensive overview of all zones
-  - Status indicators for heating, windows, batteries
-  - Customizable sorting and filtering
-  - Export capabilities (CSV/Excel)
+Install and start the official Mosquitto broker add-on, then make sure the MQTT integration is enabled in Home Assistant.
 
-- **Data Export**
-  - Detailed zone information
-  - Multiple export formats
-  - Customizable data selection
+From `0.2.0`, NeoHub Control consumes Home Assistant Supervisor's `mqtt:need` service credentials automatically. Leave the MQTT username/password blank unless you intentionally use an external broker. This fixes the common failure where Mosquitto rejects anonymous add-on clients and no discovery entities appear.
 
-- **System Overview**
-  - Device status monitoring
-  - Temperature visualization
-  - Problem detection and alerts
-  - Performance metrics
+### 3. Configure NeoHub credentials and building mapping
 
-## Installation
+```yaml
+username: your-neohub-email@example.com
+password: your-neohub-password
+url: https://neohub.co.uk/
+poll_interval: 60
+discovery_prefix: homeassistant
+base_topic: neohub
+property_name: Longueville Hall
 
-1. Clone the repository:
+# Assign each physical hub to a building/property zone.
+hub_zones:
+  - hub_name: Gate House
+    zone: Gate House
+  - hub_name: 2nd Floor
+    zone: Upper Floor
+
+# Assign thermostat points to rooms. `zone` can override the hub zone.
+room_mappings:
+  - hub_name: Gate House
+    thermostat: Kitchen
+    room: Kitchen
+    zone: Gate House
+  - hub_name: 2nd Floor
+    thermostat: G Ensuite
+    room: Green Ensuite
+    zone: Upper Floor
+
+mqtt:
+  host: ""
+  port: 1883
+  username: ""
+  password: ""
+  ssl: false
+```
+
+Start the add-on. Within one poll cycle, Home Assistant should discover entities like:
+
+```text
+climate.neohub_main_hub_kitchen_ufh_hub_1
+sensor.neohub_main_hub_kitchen_ufh_hub_1_floor_temperature
+binary_sensor.neohub_main_hub_kitchen_ufh_hub_1_window_open
+switch.neohub_main_hub_garden_socket_hub_1
+```
+
+---
+
+## Dashboard setup
+
+### Premium dashboard
+
+Use this if you want the full visual experience:
+
+```text
+dashboards/neohub-control-premium-dashboard.yaml
+```
+
+Recommended HACS cards:
+
+- Mushroom Cards
+- Auto Entities
+- ApexCharts Card
+- Optional: Card Mod for the glassmorphism hero card styling
+
+The premium dashboard auto-discovers entities matching:
+
+```text
+climate.neohub_*
+switch.neohub_*
+sensor.neohub_*
+binary_sensor.neohub_*
+```
+
+### Basic dashboard
+
+Use this if you want no custom frontend dependencies:
+
+```text
+dashboards/neohub-control-basic-dashboard.yaml
+```
+
+Edit the example entity IDs to match your actual discovered entities.
+
+---
+
+## MQTT topic model
+
+For a hub called `Main Hub`, hub ID `hub-1`, and a zone called `Kitchen UFH`, the bridge creates an object ID like:
+
+```text
+neohub_main_hub_kitchen_ufh_hub_1
+```
+
+Discovery:
+
+```text
+homeassistant/climate/neohub_main_hub_kitchen_ufh_hub_1/config
+```
+
+State:
+
+```text
+neohub/neohub_main_hub_kitchen_ufh_hub_1/availability
+neohub/neohub_main_hub_kitchen_ufh_hub_1/current_temperature
+neohub/neohub_main_hub_kitchen_ufh_hub_1/target_temperature
+neohub/neohub_main_hub_kitchen_ufh_hub_1/mode
+neohub/neohub_main_hub_kitchen_ufh_hub_1/action
+neohub/neohub_main_hub_kitchen_ufh_hub_1/humidity
+neohub/neohub_main_hub_kitchen_ufh_hub_1/floor_temperature
+neohub/neohub_main_hub_kitchen_ufh_hub_1/modulation_level
+neohub/neohub_main_hub_kitchen_ufh_hub_1/attributes
+```
+
+Commands:
+
+```text
+neohub/neohub_main_hub_kitchen_ufh_hub_1/set_temperature
+neohub/neohub_main_hub_kitchen_ufh_hub_1/set_mode
+```
+
+---
+
+## Development
+
+Install local development dependencies:
+
 ```bash
-git clone https://github.com/GitDakky/NeoHub-Control.git
-cd NeoHub-Control
-```
-
-2. Install dependencies:
-```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Usage
+Run tests:
 
-1. Run the Streamlit app:
 ```bash
-streamlit run app.py
+PYTHONPATH=. pytest -q
 ```
 
-2. Open your browser and navigate to the provided URL (typically http://localhost:8501)
+Run the add-on bridge tests against the packaged add-on copy:
 
-3. Log in with your NeoHub credentials
+```bash
+PYTHONPATH=addons/neohub_control/app pytest tests/test_ha_mqtt.py -q
+```
 
-## Status Indicators
+Run lint:
 
-The dashboard uses the following indicators to show device status:
+```bash
+ruff check .
+```
 
-- 🔥 Heating active
-- 🪟 Window open
-- 🔋 Low battery
-- ⚠️ Invalid reading
-- ✓ Normal operation
+Build the add-on image locally:
 
-## Device Types
+```bash
+docker build -t neohub-control-addon-test addons/neohub_control
+```
 
-The system supports two types of devices:
+---
 
-- **Thermostat**: Temperature control and monitoring
-- **Socket**: Power socket control (no temperature readings)
+## Current status
 
-## Requirements
+Working and tested locally:
 
-- Python 3.8 or higher
-- NeoHub account and devices
-- Internet connection
+- MQTT discovery payload generation
+- Climate state publishing
+- Socket state publishing
+- Command topic routing
+- Temperature command validation
+- Python compile checks
+- Ruff lint checks
+- YAML parsing checks
+
+Needs real-world validation:
+
+- Live NeoHub account/device test
+- Home Assistant add-on store install flow
+- Docker build on a running Docker daemon
+- Long-running MQTT reconnect behavior under broker/cloud outages
+
+---
+
+## Neostat WiFi note
+
+This project is designed for NeoHub-backed devices. A reported Neostat WiFi case can read data but receives an HTML redirect when attempting control endpoints such as `hm_set_temp`. That likely needs a separate Neostat WiFi control strategy rather than the NeoHub control path.
+
+---
+
+## Security and privacy
+
+- Credentials are read from Home Assistant add-on options.
+- Credentials are not published to MQTT.
+- MQTT discovery/state topics contain hub and zone names; choose zone names accordingly if topic visibility matters in your network.
+- Use a trusted MQTT broker and avoid exposing it directly to the internet.
+
+---
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+Pull requests are welcome.
+
+Good first contributions:
+
+- Confirm live device compatibility
+- Add reconnect/backoff hardening
+- Improve socket-specific control semantics
+- Add optional sensors for diagnostics
+- Add Home Assistant screenshots
+- Package releases and SLSA provenance for real build artifacts
+
+Please include tests for behavior changes where practical.
+
+---
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT. See `LICENSE`.
 
-## Author
-
-DAK
+---
 
 ## Acknowledgments
 
-- NeoHub API
-- Streamlit framework
-- Python community
+Built for the Home Assistant and Heatmiser communities, with respect for people who believe their heating system should be as observable and automatable as the rest of their infrastructure.
