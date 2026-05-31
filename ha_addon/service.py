@@ -249,6 +249,7 @@ class NeoHubMQTTBridge:
     def publish_all(self) -> None:
         published = 0
         for device in self.devices:
+            self._publish_hub_discovery(device)
             if not self._device_is_online(device):
                 _LOGGER.warning("NeoHub %s is offline; skipping point polling", getattr(device, "devicename", device))
                 self._publish_hub_status(device, "offline")
@@ -439,10 +440,30 @@ class NeoHubMQTTBridge:
         self._publish_json(f"{self.discovery_prefix}/binary_sensor/{object_id}/config", payload, retain=True)
         self.mqtt.publish(topic, "ON" if _bool(_zone_get(zone, field, False)) else "OFF", retain=True)
 
+    def _publish_hub_discovery(self, device: Any) -> None:
+        object_id = self._hub_object_id(device)
+        topic_prefix = f"{self.base_topic}/{object_id}"
+        payload = {
+            "name": f"{getattr(device, 'devicename', 'NeoHub')} Online",
+            "unique_id": f"{object_id}_online",
+            "object_id": f"{object_id}_online",
+            "device": self._hub_device_info(device),
+            "state_topic": f"{topic_prefix}/availability",
+            "payload_on": "online",
+            "payload_off": "offline",
+            "device_class": "connectivity",
+            "entity_category": "diagnostic",
+        }
+        self._publish_json(f"{self.discovery_prefix}/binary_sensor/{object_id}_online/config", payload, retain=True)
+
     def _publish_hub_status(self, device: Any, availability: str) -> None:
+        object_id = self._hub_object_id(device)
+        self.mqtt.publish(f"{self.base_topic}/{object_id}/availability", availability, retain=True)
+
+    def _hub_object_id(self, device: Any) -> str:
         device_name = slugify(str(getattr(device, "devicename", "device")))
         device_id = slugify(str(getattr(device, "deviceid", device_name)))
-        self.mqtt.publish(f"{self.base_topic}/hub_{device_name}_{device_id}/availability", availability, retain=True)
+        return f"neohub_hub_{device_name}_{device_id[-8:]}"
 
     def _publish_json(self, topic: str, payload: dict[str, Any], retain: bool = False) -> None:
         self.mqtt.publish(topic, payload, retain=retain)

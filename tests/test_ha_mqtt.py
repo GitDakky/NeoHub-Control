@@ -105,6 +105,9 @@ def test_bridge_publishes_climate_discovery_and_state_for_thermostat_zone():
     assert discovery["mode_command_topic"] == f"neohub/{object_id}/set_mode"
     assert discovery["modes"] == ["heat", "cool", "fan_only", "off"]
 
+    assert payload_for(fake_mqtt, "homeassistant/binary_sensor/neohub_hub_main_hub_hub_1_online/config")["device_class"] == "connectivity"
+    assert payload_for(fake_mqtt, "neohub/neohub_hub_main_hub_hub_1/availability") == "online"
+
     assert payload_for(fake_mqtt, f"neohub/{object_id}/current_temperature") == 19.5
     assert payload_for(fake_mqtt, f"neohub/{object_id}/target_temperature") == 21.0
     assert payload_for(fake_mqtt, f"neohub/{object_id}/action") == "heating"
