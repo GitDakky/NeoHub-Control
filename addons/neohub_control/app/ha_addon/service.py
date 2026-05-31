@@ -241,6 +241,7 @@ class NeoHubMQTTBridge:
         self.devices: list[Any] = []
         self.bindings_by_object_id: dict[str, ZoneBinding] = {}
         self.bindings_by_command_topic: dict[str, ZoneBinding] = {}
+        self._reset_discovery_topics: set[str] = set()
 
     def startup(self) -> None:
         self.devices = list(self.neohub_client.login())
@@ -342,7 +343,7 @@ class NeoHubMQTTBridge:
             "humidity_state_topic": f"{topic_prefix}/humidity",
             "json_attributes_topic": f"{topic_prefix}/attributes",
         }
-        self._publish_json(f"{self.discovery_prefix}/climate/{binding.object_id}/config", discovery, retain=True)
+        self._publish_discovery_config(f"{self.discovery_prefix}/climate/{binding.object_id}/config", discovery)
         self._subscribe_command(binding, f"{topic_prefix}/set_temperature")
         self._subscribe_command(binding, f"{topic_prefix}/set_mode")
 
@@ -362,7 +363,7 @@ class NeoHubMQTTBridge:
             "payload_off": "OFF",
             "json_attributes_topic": f"{topic_prefix}/attributes",
         }
-        self._publish_json(f"{self.discovery_prefix}/switch/{binding.object_id}/config", discovery, retain=True)
+        self._publish_discovery_config(f"{self.discovery_prefix}/switch/{binding.object_id}/config", discovery)
         self._subscribe_command(binding, f"{topic_prefix}/set_mode")
 
     def _publish_climate_state(self, binding: ZoneBinding, zone: Any) -> None:
@@ -418,7 +419,7 @@ class NeoHubMQTTBridge:
             payload["unit_of_measurement"] = unit
         if device_class:
             payload["device_class"] = device_class
-        self._publish_json(f"{self.discovery_prefix}/sensor/{object_id}/config", payload, retain=True)
+        self._publish_discovery_config(f"{self.discovery_prefix}/sensor/{object_id}/config", payload)
         self.mqtt.publish(topic, value, retain=True)
 
     def _publish_binary_sensor(self, binding: ZoneBinding, device: Any, zone: Any, key: str, field: str, device_class: str | None) -> None:
@@ -437,7 +438,7 @@ class NeoHubMQTTBridge:
         }
         if device_class:
             payload["device_class"] = device_class
-        self._publish_json(f"{self.discovery_prefix}/binary_sensor/{object_id}/config", payload, retain=True)
+        self._publish_discovery_config(f"{self.discovery_prefix}/binary_sensor/{object_id}/config", payload)
         self.mqtt.publish(topic, "ON" if _bool(_zone_get(zone, field, False)) else "OFF", retain=True)
 
     def _publish_hub_discovery(self, device: Any) -> None:
@@ -454,7 +455,7 @@ class NeoHubMQTTBridge:
             "device_class": "connectivity",
             "entity_category": "diagnostic",
         }
-        self._publish_json(f"{self.discovery_prefix}/binary_sensor/{object_id}_online/config", payload, retain=True)
+        self._publish_discovery_config(f"{self.discovery_prefix}/binary_sensor/{object_id}_online/config", payload)
 
     def _publish_hub_status(self, device: Any, availability: str) -> None:
         object_id = self._hub_object_id(device)
@@ -464,6 +465,16 @@ class NeoHubMQTTBridge:
         device_name = slugify(str(getattr(device, "devicename", "device")))
         device_id = slugify(str(getattr(device, "deviceid", device_name)))
         return f"neohub_hub_{device_name}_{device_id[-8:]}"
+
+    def _publish_discovery_config(self, topic: str, payload: dict[str, Any]) -> None:
+        # Home Assistant binds an MQTT discovery topic to its first unique_id.
+        # v0.2.0 used non-prefixed unique IDs, so existing installs need a retained
+        # tombstone on the same topic before publishing the v2 config. MQTT ordering
+        # on one client preserves the delete-then-create sequence.
+        if topic not in self._reset_discovery_topics:
+            self.mqtt.publish(topic, "", retain=True)
+            self._reset_discovery_topics.add(topic)
+        self._publish_json(topic, payload, retain=True)
 
     def _publish_json(self, topic: str, payload: dict[str, Any], retain: bool = False) -> None:
         self.mqtt.publish(topic, payload, retain=retain)
