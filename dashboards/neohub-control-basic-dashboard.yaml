@@ -17,32 +17,41 @@ views:
 
           Your Heatmiser NeoHub heating estate, surfaced through MQTT Discovery.
 
-          Replace the example entity IDs below with your discovered `climate.neohub_*` and `switch.neohub_*` entities.
+          Replace the example entity IDs below with your discovered `climate.neohub_*`, `switch.neohub_*`, `sensor.neohub_*`, and `binary_sensor.neohub_*` entities.
 
       - type: thermostat
-        entity: climate.neohub_main_hub_kitchen_ufh
+        entity: climate.neohub_main_hub_kitchen_ufh_hub_1
         name: Kitchen UFH
 
       - type: entities
-        title: Heating Zones
+        title: Climate Zones
         show_header_toggle: false
         entities:
-          - climate.neohub_main_hub_kitchen_ufh
-          - climate.neohub_main_hub_lounge
-          - climate.neohub_main_hub_bedroom
+          - climate.neohub_main_hub_kitchen_ufh_hub_1
+          - climate.neohub_main_hub_lounge_hub_1
+          - climate.neohub_main_hub_bedroom_hub_1
 
       - type: history-graph
         title: Temperature History
         hours_to_show: 24
         entities:
-          - entity: climate.neohub_main_hub_kitchen_ufh
+          - entity: climate.neohub_main_hub_kitchen_ufh_hub_1
             name: Kitchen UFH
-          - entity: climate.neohub_main_hub_lounge
+          - entity: climate.neohub_main_hub_lounge_hub_1
             name: Lounge
 
       - type: entities
         title: Socket Zones
         show_header_toggle: false
         entities:
-          - switch.neohub_main_hub_garden_socket
-          - switch.neohub_main_hub_utility_socket
+          - switch.neohub_main_hub_garden_socket_hub_1
+          - switch.neohub_main_hub_utility_socket_hub_1
+
+      - type: entities
+        title: Diagnostics
+        show_header_toggle: false
+        entities:
+          - sensor.neohub_main_hub_kitchen_ufh_hub_1_floor_temperature
+          - sensor.neohub_main_hub_kitchen_ufh_hub_1_modulation_level
+          - binary_sensor.neohub_main_hub_kitchen_ufh_hub_1_window_open
+          - binary_sensor.neohub_main_hub_kitchen_ufh_hub_1_low_battery

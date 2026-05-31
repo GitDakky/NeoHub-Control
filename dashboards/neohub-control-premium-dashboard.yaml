@@ -8,8 +8,10 @@
 #
 # The add-on creates entities whose MQTT unique IDs begin with `neohub_`.
 # In most Home Assistant installs the entity IDs will look like:
-#   climate.neohub_main_hub_kitchen_ufh
-#   switch.neohub_main_hub_garden_socket
+#   climate.neohub_main_hub_kitchen_ufh_hub_1
+#   sensor.neohub_main_hub_kitchen_ufh_hub_1_floor_temperature
+#   binary_sensor.neohub_main_hub_kitchen_ufh_hub_1_window_open
+#   switch.neohub_main_hub_garden_socket_hub_1
 #
 # Import this from Settings → Dashboards → Add Dashboard → YAML mode,
 # or paste the views into an existing dashboard.
@@ -195,6 +197,8 @@ views:
               include:
                 - entity_id: climate.neohub_*
                 - entity_id: switch.neohub_*
+                - entity_id: sensor.neohub_*
+                - entity_id: binary_sensor.neohub_*
             sort:
               method: domain
       - type: grid
@@ -211,7 +215,13 @@ views:
               ## Default topic pattern
 
               ```text
-              homeassistant/climate/neohub_<hub>_<zone>/config
-              neohub/neohub_<hub>_<zone>/current_temperature
-              neohub/neohub_<hub>_<zone>/set_temperature
+              homeassistant/climate/neohub_<hub>_<thermostat>_<hub_id>/config
+              neohub/neohub_<hub>_<thermostat>_<hub_id>/current_temperature
+              neohub/neohub_<hub>_<thermostat>_<hub_id>/set_temperature
               ```
+
+              ## Mapping model
+
+              - Assign each physical hub to a broad property zone in `hub_zones`.
+              - Assign thermostat points to actual rooms in `room_mappings`.
+              - Entity attributes expose `property_zone` and `room` for filtering/grouping.

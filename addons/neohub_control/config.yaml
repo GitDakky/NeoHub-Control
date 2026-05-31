@@ -1,8 +1,8 @@
 name: NeoHub Control
 slug: neohub_control
-description: Expose Heatmiser NeoHub thermostats and sockets to Home Assistant via MQTT discovery.
-version: 0.1.0
-url: https://github.com/GitDakky/NeoHub-Control
+description: Expose Heatmiser NeoHub thermostats, sockets, diagnostics, and zone/room metadata to Home Assistant via MQTT Discovery.
+version: 0.2.0
+url: https://github.com/GitDakky/neohub-control-home-assistant
 arch:
   - aarch64
   - amd64
@@ -23,11 +23,15 @@ options:
   poll_interval: 60
   discovery_prefix: homeassistant
   base_topic: neohub
+  property_name: Home
+  hub_zones: []
+  room_mappings: []
   mqtt:
-    host: core-mosquitto
+    host: ""
     port: 1883
     username: ""
     password: ""
+    ssl: false
 schema:
   username: str
   password: password
@@ -35,8 +39,20 @@ schema:
   poll_interval: int(15,3600)
   discovery_prefix: str
   base_topic: str
+  property_name: str
+  hub_zones:
+    - hub_id: str?
+      hub_name: str?
+      zone: str
+  room_mappings:
+    - hub_id: str?
+      hub_name: str?
+      thermostat: str
+      room: str
+      zone: str?
   mqtt:
-    host: str
+    host: str?
     port: port
     username: str?
     password: password?
+    ssl: bool?

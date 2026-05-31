@@ -114,9 +114,13 @@ class NeoHub:
     def __init__(self, username: str, password: str, url: Optional[str] = None):
         self.username = username
         self.password = password
-        self.url = url or DEFAULT_URL
+        self.url = self._normalise_url(url or DEFAULT_URL)
         self.token = None
         self.session = requests.Session()
+
+    @staticmethod
+    def _normalise_url(url: str) -> str:
+        return url.rstrip('/') + '/'
 
     def login(self) -> List[Device]:
         """Login to NeoHub and return list of devices."""
