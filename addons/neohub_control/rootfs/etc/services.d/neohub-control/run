@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bashio
+set -euo pipefail
+
+cd /opt/neohub-control
+exec /opt/neohub-control/venv/bin/python -m ha_addon.service

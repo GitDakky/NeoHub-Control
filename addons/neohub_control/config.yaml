@@ -1,0 +1,42 @@
+name: NeoHub Control
+slug: neohub_control
+description: Expose Heatmiser NeoHub thermostats and sockets to Home Assistant via MQTT discovery.
+version: 0.1.0
+url: https://github.com/GitDakky/NeoHub-Control
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+startup: services
+boot: auto
+init: false
+services:
+  - mqtt:need
+map:
+  - share:rw
+options:
+  username: ""
+  password: ""
+  url: "https://neohub.co.uk/"
+  poll_interval: 60
+  discovery_prefix: homeassistant
+  base_topic: neohub
+  mqtt:
+    host: core-mosquitto
+    port: 1883
+    username: ""
+    password: ""
+schema:
+  username: str
+  password: password
+  url: url
+  poll_interval: int(15,3600)
+  discovery_prefix: str
+  base_topic: str
+  mqtt:
+    host: str
+    port: port
+    username: str?
+    password: password?

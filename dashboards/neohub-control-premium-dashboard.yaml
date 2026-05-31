@@ -1,0 +1,217 @@
+# NeoHub Control Premium Dashboard
+#
+# This Lovelace dashboard is designed for the NeoHub Control Home Assistant add-on.
+# It uses popular HACS cards for an auto-populating, polished experience:
+#   - Mushroom Cards: https://github.com/piitaya/lovelace-mushroom
+#   - Auto Entities: https://github.com/thomasloven/lovelace-auto-entities
+#   - ApexCharts Card: https://github.com/RomRider/apexcharts-card
+#
+# The add-on creates entities whose MQTT unique IDs begin with `neohub_`.
+# In most Home Assistant installs the entity IDs will look like:
+#   climate.neohub_main_hub_kitchen_ufh
+#   switch.neohub_main_hub_garden_socket
+#
+# Import this from Settings → Dashboards → Add Dashboard → YAML mode,
+# or paste the views into an existing dashboard.
+
+title: NeoHub Control
+path: neohub-control
+icon: mdi:radiator
+background: radial-gradient(circle at top left, rgba(34,211,238,0.22), transparent 32%), radial-gradient(circle at top right, rgba(168,85,247,0.20), transparent 30%), linear-gradient(135deg, #020617 0%, #0f172a 45%, #111827 100%)
+views:
+  - title: Command Centre
+    path: command-centre
+    icon: mdi:home-thermometer
+    type: sections
+    max_columns: 4
+    badges: []
+    cards: []
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            card_mod:
+              style: |
+                ha-card {
+                  border: 1px solid rgba(34,211,238,0.35);
+                  border-radius: 28px;
+                  background: linear-gradient(135deg, rgba(15,23,42,0.94), rgba(30,41,59,0.72));
+                  box-shadow: 0 22px 80px rgba(8,145,178,0.22);
+                  overflow: hidden;
+                }
+                ha-markdown { padding: 8px 4px 4px; }
+            content: |
+              <div style="display:flex;align-items:center;gap:18px;">
+                <div style="width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,#22d3ee,#a78bfa);display:grid;place-items:center;box-shadow:0 0 30px rgba(34,211,238,.45);font-size:30px;">🔥</div>
+                <div>
+                  <div style="font-size:30px;font-weight:800;letter-spacing:-.04em;line-height:1.05;background:linear-gradient(90deg,#e0f2fe,#67e8f9,#c4b5fd);-webkit-background-clip:text;color:transparent;">NeoHub Control</div>
+                  <div style="color:#94a3b8;font-size:14px;margin-top:6px;">Live heat intelligence, zone command, and system health from your Heatmiser estate.</div>
+                </div>
+              </div>
+          - type: custom:auto-entities
+            card:
+              type: glance
+              title: Live NeoHub Estate
+              show_state: true
+              state_color: true
+            filter:
+              include:
+                - entity_id: climate.neohub_*
+                  options:
+                    tap_action:
+                      action: more-info
+                - entity_id: switch.neohub_*
+                  options:
+                    tap_action:
+                      action: toggle
+            sort:
+              method: friendly_name
+          - type: custom:auto-entities
+            card:
+              type: custom:mushroom-chips-card
+              alignment: center
+            card_param: chips
+            filter:
+              include:
+                - entity_id: climate.neohub_*
+                  options:
+                    type: entity
+                    icon_color: cyan
+                    tap_action:
+                      action: more-info
+                - entity_id: switch.neohub_*
+                  options:
+                    type: entity
+                    icon_color: purple
+                    tap_action:
+                      action: toggle
+      - type: grid
+        title: Climate Zones
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 2
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - entity_id: climate.neohub_*
+                  options:
+                    type: custom:mushroom-climate-card
+                    show_temperature_control: true
+                    collapsible_controls: false
+                    hvac_modes:
+                      - heat
+                      - cool
+                      - fan_only
+                      - 'off'
+                    layout: vertical
+                    fill_container: true
+                    primary_info: name
+                    secondary_info: state
+            sort:
+              method: friendly_name
+      - type: grid
+        title: Power + Socket Zones
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 2
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - entity_id: switch.neohub_*
+                  options:
+                    type: custom:mushroom-entity-card
+                    icon: mdi:power-socket-uk
+                    icon_color: amber
+                    tap_action:
+                      action: toggle
+                    hold_action:
+                      action: more-info
+            sort:
+              method: friendly_name
+      - type: grid
+        title: Temperature Intelligence
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: custom:apexcharts-card
+              graph_span: 24h
+              header:
+                show: true
+                title: 24h Zone Temperature Traces
+                show_states: true
+                colorize_states: true
+              apex_config:
+                chart:
+                  height: 320
+                  foreColor: '#cbd5e1'
+                grid:
+                  borderColor: rgba(148,163,184,0.16)
+                stroke:
+                  width: 3
+                  curve: smooth
+                legend:
+                  show: false
+              yaxis:
+                - min: ~15
+                  max: ~25
+                  decimals: 1
+              all_series_config:
+                stroke_width: 3
+                group_by:
+                  func: avg
+                  duration: 10min
+            card_param: series
+            filter:
+              include:
+                - entity_id: climate.neohub_*
+                  attribute: current_temperature
+                  options:
+                    name: this.entity_id
+                    type: line
+            sort:
+              method: friendly_name
+
+  - title: Diagnostics
+    path: diagnostics
+    icon: mdi:stethoscope
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        title: Raw Entity Matrix
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: entities
+              title: All NeoHub Entities
+              show_header_toggle: false
+            filter:
+              include:
+                - entity_id: climate.neohub_*
+                - entity_id: switch.neohub_*
+            sort:
+              method: domain
+      - type: grid
+        title: Helpful Links
+        cards:
+          - type: markdown
+            content: |
+              ## Operations
+
+              - Check add-on logs after changing credentials.
+              - MQTT Discovery topics are retained; restart the add-on after renaming zones.
+              - If entities do not appear, confirm the MQTT integration is loaded and discovery prefix is `homeassistant`.
+
+              ## Default topic pattern
+
+              ```text
+              homeassistant/climate/neohub_<hub>_<zone>/config
+              neohub/neohub_<hub>_<zone>/current_temperature
+              neohub/neohub_<hub>_<zone>/set_temperature
+              ```

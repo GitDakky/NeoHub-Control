@@ -1,0 +1,136 @@
+<svg width="1400" height="520" viewBox="0 0 1400 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">NeoHub Control for Home Assistant</title>
+  <desc id="desc">Animated cybernetic heating dashboard header showing Home Assistant, MQTT, NeoHub cloud, thermostats and radiant heating zones.</desc>
+  <defs>
+    <radialGradient id="auroraA" cx="18%" cy="18%" r="70%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.80"/>
+      <stop offset="45%" stop-color="#7c3aed" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="auroraB" cx="82%" cy="10%" r="65%">
+      <stop offset="0%" stop-color="#f97316" stop-opacity="0.72"/>
+      <stop offset="42%" stop-color="#ec4899" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a" stop-opacity="0.96"/>
+      <stop offset="50%" stop-color="#111827" stop-opacity="0.90"/>
+      <stop offset="100%" stop-color="#020617" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="46%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+    <linearGradient id="heat" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="45%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.15 0 0 0 0 0.85 0 0 0 0 1 0 0 0 0.9 0" result="cyanGlow"/>
+      <feMerge><feMergeNode in="cyanGlow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="24" stdDeviation="18" flood-color="#020617" flood-opacity="0.55"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="18" flood-color="#22d3ee" flood-opacity="0.18"/>
+    </filter>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
+      <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#1e293b" stroke-width="0.7" opacity="0.85"/>
+    </pattern>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L8,3 z" fill="#67e8f9"/>
+    </marker>
+    <style>
+      .bgShift { animation: bgShift 9s ease-in-out infinite alternate; transform-origin: 50% 50%; }
+      .pulse { animation: pulse 2.4s ease-in-out infinite; transform-origin: center; }
+      .floatA { animation: floatA 5.8s ease-in-out infinite; }
+      .floatB { animation: floatB 6.4s ease-in-out infinite; }
+      .packet { stroke-dasharray: 12 28; animation: dash 2.8s linear infinite; }
+      .packet2 { stroke-dasharray: 8 34; animation: dash 3.4s linear infinite reverse; }
+      .heatwave { animation: heatwave 3.2s ease-in-out infinite; transform-origin: center; }
+      .blink { animation: blink 1.7s ease-in-out infinite; }
+      .draw { stroke-dasharray: 900; stroke-dashoffset: 900; animation: draw 4s ease-out forwards; }
+      @keyframes bgShift { from { transform: scale(1) rotate(0deg); opacity: .85; } to { transform: scale(1.07) rotate(2deg); opacity: 1; } }
+      @keyframes pulse { 0%,100% { transform: scale(1); opacity: .78; } 50% { transform: scale(1.18); opacity: 1; } }
+      @keyframes floatA { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+      @keyframes floatB { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(10px); } }
+      @keyframes dash { to { stroke-dashoffset: -80; } }
+      @keyframes heatwave { 0%,100% { transform: translateY(0); opacity: .42; } 50% { transform: translateY(-12px); opacity: .95; } }
+      @keyframes blink { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
+      @keyframes draw { to { stroke-dashoffset: 0; } }
+      text { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="520" fill="#020617"/>
+  <rect width="1400" height="520" fill="url(#grid)" opacity="0.62"/>
+  <circle class="bgShift" cx="260" cy="80" r="360" fill="url(#auroraA)"/>
+  <circle class="bgShift" cx="1110" cy="90" r="330" fill="url(#auroraB)"/>
+  <path d="M0 410 C250 330 340 460 560 382 C820 290 910 430 1110 342 C1260 275 1325 312 1400 270 L1400 520 L0 520 Z" fill="#0f172a" opacity="0.52"/>
+  <path class="heatwave" d="M0 430 C280 355 390 466 600 390 C810 314 940 428 1150 350 C1275 304 1340 320 1400 292" fill="none" stroke="url(#heat)" stroke-width="4" opacity="0.78"/>
+  <path class="heatwave" style="animation-delay:.7s" d="M0 462 C250 390 370 485 590 420 C850 344 940 470 1168 388 C1290 344 1345 365 1400 330" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.45"/>
+
+  <g transform="translate(76 72)">
+    <rect x="0" y="0" width="1248" height="376" rx="34" fill="url(#panel)" stroke="#334155" stroke-width="1.2" filter="url(#softShadow)"/>
+    <rect x="1" y="1" width="1246" height="374" rx="33" fill="none" stroke="url(#brand)" stroke-width="1.2" opacity="0.55"/>
+
+    <g transform="translate(64 54)">
+      <circle class="pulse" cx="13" cy="13" r="7" fill="#34d399" filter="url(#glow)"/>
+      <text x="34" y="18" fill="#94a3b8" font-size="17" class="mono" letter-spacing="2">LIVE HOME ASSISTANT ADD-ON</text>
+      <text x="0" y="92" fill="url(#brand)" font-size="76" font-weight="900" letter-spacing="-4">NeoHub Control</text>
+      <text x="3" y="134" fill="#e2e8f0" font-size="25" font-weight="600">Cloud-authenticated Heatmiser intelligence for serious smart homes.</text>
+      <text x="3" y="174" fill="#94a3b8" font-size="18">MQTT Discovery · Climate Entities · Socket Control · Premium Lovelace Dashboard</text>
+
+      <g transform="translate(0 218)">
+        <rect x="0" y="0" width="168" height="48" rx="16" fill="rgba(34,211,238,0.12)" stroke="#22d3ee"/>
+        <text x="22" y="30" fill="#cffafe" font-size="16" font-weight="700">hm_user_login</text>
+        <rect x="186" y="0" width="164" height="48" rx="16" fill="rgba(167,139,250,0.12)" stroke="#a78bfa"/>
+        <text x="210" y="30" fill="#ede9fe" font-size="16" font-weight="700">MQTT Discovery</text>
+        <rect x="368" y="0" width="150" height="48" rx="16" fill="rgba(251,113,133,0.12)" stroke="#fb7185"/>
+        <text x="391" y="30" fill="#ffe4e6" font-size="16" font-weight="700">Climate UI</text>
+      </g>
+    </g>
+
+    <g transform="translate(736 68)">
+      <path class="packet draw" d="M76 90 C150 26 260 26 338 90" fill="none" stroke="#67e8f9" stroke-width="3" marker-end="url(#arrow)" opacity="0.80"/>
+      <path class="packet2" d="M338 158 C260 226 150 226 76 158" fill="none" stroke="#a78bfa" stroke-width="3" marker-end="url(#arrow)" opacity="0.72"/>
+
+      <g class="floatA">
+        <rect x="0" y="74" width="150" height="104" rx="24" fill="rgba(8,51,68,.92)" stroke="#22d3ee" stroke-width="1.5"/>
+        <circle cx="42" cy="110" r="17" fill="#22d3ee" opacity="0.22"/>
+        <path d="M33 111 L42 100 L52 111 L52 126 L33 126 Z" fill="#67e8f9"/>
+        <text x="76" y="112" fill="#e0f2fe" font-size="17" font-weight="800">Home</text>
+        <text x="76" y="134" fill="#bae6fd" font-size="15" font-weight="800">Assistant</text>
+        <text x="26" y="160" fill="#67e8f9" font-size="12" class="mono">climate.* switch.*</text>
+      </g>
+
+      <g class="floatB">
+        <rect x="292" y="74" width="150" height="104" rx="24" fill="rgba(76,29,149,.86)" stroke="#a78bfa" stroke-width="1.5"/>
+        <circle cx="334" cy="110" r="17" fill="#a78bfa" opacity="0.22"/>
+        <path d="M325 112 C325 101 343 101 343 112 C343 123 325 123 325 112Z" fill="#c4b5fd"/>
+        <text x="368" y="112" fill="#ede9fe" font-size="17" font-weight="800">NeoHub</text>
+        <text x="368" y="134" fill="#ddd6fe" font-size="15" font-weight="800">Cloud</text>
+        <text x="320" y="160" fill="#c4b5fd" font-size="12" class="mono">status + control</text>
+      </g>
+
+      <g transform="translate(84 235)">
+        <rect x="0" y="0" width="58" height="74" rx="16" fill="rgba(251,146,60,.14)" stroke="#fb923c"/>
+        <circle class="blink" cx="29" cy="28" r="13" fill="#f97316"/>
+        <text x="17" y="58" fill="#fed7aa" font-size="11" class="mono">21°</text>
+      </g>
+      <g transform="translate(184 235)">
+        <rect x="0" y="0" width="58" height="74" rx="16" fill="rgba(34,211,238,.12)" stroke="#22d3ee"/>
+        <circle class="blink" style="animation-delay:.35s" cx="29" cy="28" r="13" fill="#06b6d4"/>
+        <text x="17" y="58" fill="#cffafe" font-size="11" class="mono">19°</text>
+      </g>
+      <g transform="translate(284 235)">
+        <rect x="0" y="0" width="58" height="74" rx="16" fill="rgba(52,211,153,.12)" stroke="#34d399"/>
+        <circle class="blink" style="animation-delay:.7s" cx="29" cy="28" r="13" fill="#34d399"/>
+        <text x="17" y="58" fill="#d1fae5" font-size="11" class="mono">ON</text>
+      </g>
+    </g>
+  </g>
+</svg>

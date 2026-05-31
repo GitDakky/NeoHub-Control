@@ -1,0 +1,48 @@
+# NeoHub Control Zero-Dependency Dashboard
+#
+# This dashboard uses only built-in Home Assistant cards.
+# Replace the example entity IDs with your generated NeoHub entities.
+
+title: NeoHub Control
+path: neohub-control-basic
+icon: mdi:radiator
+views:
+  - title: Heating
+    path: heating
+    icon: mdi:home-thermometer-outline
+    cards:
+      - type: markdown
+        content: |
+          # 🔥 NeoHub Control
+
+          Your Heatmiser NeoHub heating estate, surfaced through MQTT Discovery.
+
+          Replace the example entity IDs below with your discovered `climate.neohub_*` and `switch.neohub_*` entities.
+
+      - type: thermostat
+        entity: climate.neohub_main_hub_kitchen_ufh
+        name: Kitchen UFH
+
+      - type: entities
+        title: Heating Zones
+        show_header_toggle: false
+        entities:
+          - climate.neohub_main_hub_kitchen_ufh
+          - climate.neohub_main_hub_lounge
+          - climate.neohub_main_hub_bedroom
+
+      - type: history-graph
+        title: Temperature History
+        hours_to_show: 24
+        entities:
+          - entity: climate.neohub_main_hub_kitchen_ufh
+            name: Kitchen UFH
+          - entity: climate.neohub_main_hub_lounge
+            name: Lounge
+
+      - type: entities
+        title: Socket Zones
+        show_header_toggle: false
+        entities:
+          - switch.neohub_main_hub_garden_socket
+          - switch.neohub_main_hub_utility_socket

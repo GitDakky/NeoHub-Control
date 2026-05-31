@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import io
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 from neohub import NeoHub
 
 # Initialize session state
