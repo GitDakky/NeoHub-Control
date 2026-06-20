@@ -214,7 +214,7 @@ def test_zone_and_room_mapping_are_published_as_device_metadata_and_attributes()
     fake_client = FakeNeoHubClient()
     fake_mqtt = FakeMQTT()
     mapping = MappingSettings(
-        property_name="Longueville Hall",
+        property_name="Example House",
         hub_zones=({"hub_id": "hub-1", "zone": "East Wing"},),
         room_mappings=({"hub_id": "hub-1", "thermostat": "Kitchen UFH", "room": "Kitchen", "zone": "Family Zone"},),
     )
@@ -230,7 +230,7 @@ def test_zone_and_room_mapping_are_published_as_device_metadata_and_attributes()
     assert discovery["name"] is None
     assert discovery["device"]["name"] == "NeoHub Kitchen (Kitchen UFH)"
     assert discovery["device"]["suggested_area"] == "Kitchen"
-    assert attrs["property_name"] == "Longueville Hall"
+    assert attrs["property_name"] == "Example House"
     assert attrs["property_zone"] == "Family Zone"
     assert attrs["room"] == "Kitchen"
     assert attrs["hub_name"] == "Main Hub"

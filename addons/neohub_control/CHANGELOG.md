@@ -2,6 +2,18 @@
 
 All notable changes to NeoHub Control are documented here.
 
+## [0.2.5] - 2026-06-20
+
+### Added
+
+- Add a valid HACS companion integration layout under `custom_components/neohub_control` so users who paste the repository into HACS no longer receive the add-on repository rejection.
+- Add an in-Home Assistant helper notification and config flow explaining that the working bridge still installs through the Home Assistant Add-on Store because HACS does not manage add-on containers.
+
+### Changed
+
+- Clarify the add-on versus HACS installation paths in the root and add-on documentation.
+- Replace customer-specific example property names with generic examples.
+
 ## [0.2.4] - 2026-06-20
 
 ### Changed

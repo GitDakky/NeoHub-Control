@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "NeoHub Control",
+        "description": "NeoHub Control runs as a Home Assistant add-on. HACS can install this companion helper, but HACS cannot run or update add-on containers. To install the working bridge, add `{repository_url}` in Settings > Add-ons > Add-on Store > Repositories, or open `{addon_store_url}`. Submit to create a helper entry that keeps these instructions in Home Assistant."
+      }
+    },
+    "abort": {
+      "already_configured": "NeoHub Control helper is already configured."
+    }
+  }
+}
