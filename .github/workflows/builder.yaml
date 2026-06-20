@@ -43,12 +43,17 @@ jobs:
         shell: bash
         run: |
           image='${{ steps.info.outputs.image }}'
+          version='${{ steps.info.outputs.version }}'
+          # Strip surrounding quotes if HA helper returned quoted YAML strings
+          image="${image//\"/}"
+          version="${version//\"/}"
           if [[ -z "${image}" || "${image}" == "null" ]]; then
             echo "::error::addons/neohub_control/config.yaml must define an image reference"
             exit 1
           fi
           echo "image_name=${image##*/}" >> "${GITHUB_OUTPUT}"
           echo "registry_prefix=${image%/*}" >> "${GITHUB_OUTPUT}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
       - name: Prepare multi-arch matrix
         id: matrix

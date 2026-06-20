@@ -653,7 +653,9 @@ def _mqtt_settings_from_options(options: dict[str, Any]) -> MQTTSettings:
     explicit_password = _option_or_env(mqtt_options, "password", "MQTT_PASSWORD", "")
     has_explicit_auth = bool(explicit_username)
     has_explicit_host = bool(explicit_host)
-    if not has_explicit_auth:
+    # Explicit host takes priority over Supervisor MQTT — an unauthenticated
+    # external broker is a valid configuration.
+    if not has_explicit_host and not has_explicit_auth:
         supervisor_settings = _supervisor_mqtt_settings()
         if supervisor_settings:
             supervisor_settings.client_id = mqtt_options.get("client_id") or "neohub-control-addon"
