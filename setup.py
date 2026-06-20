@@ -12,7 +12,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="neohub-control",
-    version="0.2.4",
+    version="0.2.5",
     author="DAK",
     description="MQTT bridge and Home Assistant add-on for Heatmiser NeoHub systems",
     long_description=long_description,

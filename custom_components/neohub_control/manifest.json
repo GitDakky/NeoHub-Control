@@ -1,0 +1,11 @@
+{
+  "domain": "neohub_control",
+  "name": "NeoHub Control",
+  "codeowners": ["@GitDakky"],
+  "config_flow": true,
+  "documentation": "https://github.com/GitDakky/NeoHub-Control",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/GitDakky/NeoHub-Control/issues",
+  "version": "0.2.5"
+}

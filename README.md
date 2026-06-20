@@ -51,6 +51,12 @@ NeoHub Control is for people who want more than a vendor app:
 - Reads configuration from the standard add-on `/data/options.json`
 - Uses the Mosquitto add-on by default at `core-mosquitto:1883`
 
+### HACS companion helper
+
+- Provides a valid `custom_components/neohub_control` integration layout so HACS accepts the repository when users paste it there by mistake
+- Shows the correct Add-on Store installation route from inside Home Assistant
+- Does not replace the add-on runtime, because HACS does not run add-on containers
+
 ### Climate + socket entities
 
 - Thermostat-like zones become MQTT `climate` entities
@@ -119,6 +125,9 @@ The add-on is intentionally MQTT-native. MQTT Discovery is the cleanest way for 
 
 ```text
 .
+├── hacs.json                        # HACS custom repository metadata
+├── custom_components/
+│   └── neohub_control/              # HACS companion helper integration
 ├── repository.yaml                  # Home Assistant add-on repository manifest
 ├── addons/
 │   └── neohub_control/              # Home Assistant add-on
@@ -142,6 +151,16 @@ The add-on is intentionally MQTT-native. MQTT Discovery is the cleanest way for 
 ---
 
 ## Installing in Home Assistant
+
+### Important: HACS vs Add-on Store
+
+NeoHub Control's working bridge runs as a Home Assistant add-on. HACS does not manage add-ons or add-on containers, so the functional installation path is the Home Assistant Add-on Store.
+
+From `0.2.5`, this repository also includes a small HACS companion integration under `custom_components/neohub_control`. That makes the repository valid when it is pasted into HACS as an integration, but the HACS-installed helper only explains the correct add-on installation path inside Home Assistant. It does not run the NeoHub MQTT bridge.
+
+Use the Add-on Store path below for the working bridge:
+
+[![Open your Home Assistant instance and add the NeoHub Control add-on repository.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FGitDakky%2FNeoHub-Control)
 
 ### 1. Add this repository
 
@@ -174,7 +193,7 @@ url: https://neohub.co.uk/
 poll_interval: 60
 discovery_prefix: homeassistant
 base_topic: neohub
-property_name: Longueville Hall
+property_name: Example House
 
 # Assign each physical hub to a building/property zone.
 hub_zones:
@@ -223,7 +242,7 @@ Use this if you want the full visual experience:
 dashboards/neohub-control-premium-dashboard.yaml
 ```
 
-Recommended HACS cards:
+Recommended optional frontend cards, commonly installed through HACS:
 
 - Mushroom Cards
 - Auto Entities

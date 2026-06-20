@@ -18,6 +18,18 @@ NeoHub Control logs in to the Heatmiser NeoHub cloud using `hm_user_login`, poll
 - MQTT integration enabled in Home Assistant.
 - Heatmiser NeoHub account credentials.
 
+## HACS and add-on installation
+
+NeoHub Control runs as an add-on, so the working bridge must be installed through Settings > Add-ons > Add-on Store > Repositories. HACS cannot run or update add-on containers.
+
+Version `0.2.5` adds a small HACS companion integration so HACS accepts this repository when it is added as a custom integration. That helper only shows the correct add-on installation route inside Home Assistant; it is not the runtime bridge.
+
+Use this repository URL in the Add-on Store:
+
+```text
+https://github.com/GitDakky/NeoHub-Control
+```
+
 ## Configuration
 
 ```yaml
@@ -27,7 +39,7 @@ url: https://neohub.co.uk/
 poll_interval: 60
 discovery_prefix: homeassistant
 base_topic: neohub
-property_name: Longueville Hall
+property_name: Example House
 
 # Assign physical NeoHub hardware to broad building zones.
 # Use hub_id when known; hub_name is accepted for readability.
