@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from ha_addon.service import MappingSettings, NeoHubMQTTBridge, _mqtt_settings_from_options, slugify
+from ha_addon.service import MappingSettings, NeoHubMQTTBridge, PahoMQTTAdapter, _mqtt_settings_from_options, slugify
 from neohub.neohub import NeoHub
 
 
@@ -266,3 +266,55 @@ def test_neohub_url_without_trailing_slash_is_normalised():
     client = NeoHub("user", "pass", "https://neohub.co.uk")
 
     assert client.url == "https://neohub.co.uk/"
+
+
+def test_mqtt_ssl_false_option_overrides_environment(monkeypatch):
+    monkeypatch.setenv("MQTT_SSL", "true")
+
+    settings = _mqtt_settings_from_options({"mqtt": {"host": "broker.local", "ssl": False}})
+
+    assert settings.host == "broker.local"
+    assert settings.ssl_enabled is False
+    assert settings.source == "explicit-options"
+
+
+def test_paho_disconnect_callback_accepts_v1_and_v2_signatures():
+    class Connected:
+        def __init__(self):
+            self.clear_calls = 0
+
+        def clear(self):
+            self.clear_calls += 1
+
+    adapter = object.__new__(PahoMQTTAdapter)
+    adapter._connected = Connected()
+
+    adapter._on_disconnect(None, None, 0)
+    adapter._on_disconnect(None, None, object(), 0, object())
+
+    assert adapter._connected.clear_calls == 2
+
+
+def test_neohub_api_requests_use_configured_timeout():
+    class Response:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"STATUS": 1, "TOKEN": "token", "devices": []}
+
+    class Session:
+        def __init__(self):
+            self.calls = []
+
+        def post(self, url, data, timeout):
+            self.calls.append({"url": url, "data": data, "timeout": timeout})
+            return Response()
+
+    client = NeoHub("user", "pass", "https://neohub.co.uk", request_timeout=7)
+    client.session = Session()
+
+    client.login()
+
+    assert client.session.calls[0]["url"] == "https://neohub.co.uk/hm_user_login"
+    assert client.session.calls[0]["timeout"] == 7

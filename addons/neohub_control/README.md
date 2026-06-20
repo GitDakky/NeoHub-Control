@@ -9,7 +9,7 @@ The add-on uses the existing NeoHub cloud login/data/control flow:
 - `hm_set_temp` for target temperature commands
 - `hm_set_mode` for mode/switch commands
 
-Version `0.2.0` adds automatic Supervisor MQTT credential discovery, stable multi-hub IDs, diagnostic sensors/binary sensors, and configurable hub → property-zone plus thermostat → room mapping for properties with multiple hubs.
+Version `0.2.4` aligns the add-on with current Home Assistant app guidance: pre-built GHCR images, official Home Assistant builder workflow, automatic Supervisor MQTT credential discovery, stable multi-hub IDs, diagnostic sensors/binary sensors, and configurable hub → property-zone plus thermostat → room mapping for properties with multiple hubs.
 
 Includes premium and zero-dependency Lovelace dashboard templates in the repository `dashboards/` directory.
 

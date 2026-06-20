@@ -1,21 +1,20 @@
-name: NeoHub Control
+name: "NeoHub Control"
 slug: neohub_control
-description: Expose Heatmiser NeoHub thermostats, sockets, diagnostics, and zone/room metadata to Home Assistant via MQTT Discovery.
-version: 0.2.3
-url: https://github.com/GitDakky/NeoHub-Control
+description: "Expose Heatmiser NeoHub thermostats, sockets, diagnostics, and zone/room metadata to Home Assistant via MQTT Discovery."
+version: "0.2.4"
+url: "https://github.com/GitDakky/NeoHub-Control"
+image: "ghcr.io/gitdakky/neohub-control"
 arch:
   - aarch64
   - amd64
-  - armhf
-  - armv7
-  - i386
 startup: services
 boot: auto
 init: false
+apparmor: true
+hassio_api: true
+hassio_role: default
 services:
   - mqtt:need
-map:
-  - share:rw
 options:
   username: ""
   password: ""

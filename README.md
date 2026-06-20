@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/GitDakky/neohub-control-home-assistant"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-GitDakky%2Fneohub--control--home--assistant-111827?style=for-the-badge&logo=github&logoColor=white"></a>
+  <a href="https://github.com/GitDakky/NeoHub-Control"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-GitDakky%2Fneohub--control--home--assistant-111827?style=for-the-badge&logo=github&logoColor=white"></a>
   <img alt="Home Assistant" src="https://img.shields.io/badge/Home%20Assistant-Add--on-18BCF2?style=for-the-badge&logo=homeassistant&logoColor=white">
   <img alt="MQTT Discovery" src="https://img.shields.io/badge/MQTT-Discovery-660066?style=for-the-badge&logo=mqtt&logoColor=white">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white">
@@ -47,7 +47,7 @@ NeoHub Control is for people who want more than a vendor app:
 - Add this repository directly to the Home Assistant Add-on Store
 - Runs inside Home Assistant OS / Supervised as an add-on
 - Uses MQTT Discovery to create Home Assistant entities automatically
-- Supports multi-architecture builds: `aarch64`, `amd64`, `armhf`, `armv7`, `i386`
+- Uses pre-built GHCR images and Home Assistant builder actions for supported `aarch64` and `amd64` systems
 - Reads configuration from the standard add-on `/data/options.json`
 - Uses the Mosquitto add-on by default at `core-mosquitto:1883`
 
@@ -153,7 +153,7 @@ In Home Assistant:
 4. Add:
 
 ```text
-https://github.com/GitDakky/neohub-control-home-assistant
+https://github.com/GitDakky/NeoHub-Control
 ```
 
 5. Refresh the add-on store
@@ -163,7 +163,7 @@ https://github.com/GitDakky/neohub-control-home-assistant
 
 Install and start the official Mosquitto broker add-on, then make sure the MQTT integration is enabled in Home Assistant.
 
-From `0.2.0`, NeoHub Control consumes Home Assistant Supervisor's `mqtt:need` service credentials automatically. Leave the MQTT username/password blank unless you intentionally use an external broker. This fixes the common failure where Mosquitto rejects anonymous add-on clients and no discovery entities appear.
+From `0.2.4`, NeoHub Control explicitly declares minimal Supervisor API access and consumes Home Assistant Supervisor's `mqtt:need` service credentials automatically. Leave the MQTT username/password blank unless you intentionally use an external broker. This fixes the common failure where Mosquitto rejects anonymous add-on clients and no discovery entities appear.
 
 ### 3. Configure NeoHub credentials and building mapping
 
@@ -316,11 +316,11 @@ Run lint:
 ruff check .
 ```
 
-Build the add-on image locally:
+Build and publish flow:
 
-```bash
-docker build -t neohub-control-addon-test addons/neohub_control
-```
+- Pull requests run the Home Assistant builder workflow without publishing images.
+- Pushes to `master` publish `ghcr.io/gitdakky/neohub-control:<version>` and `latest` multi-architecture images.
+- `addons/neohub_control/config.yaml` points Home Assistant at the pre-built GHCR image, which avoids slow and fragile local builds on Home Assistant hosts.
 
 ---
 
@@ -341,8 +341,8 @@ Needs real-world validation:
 
 - Live NeoHub account/device test
 - Home Assistant add-on store install flow
-- Docker build on a running Docker daemon
-- Long-running MQTT reconnect behavior under broker/cloud outages
+- Live Home Assistant install/update through the GHCR image published by CI
+- Long-running MQTT reconnect behaviour under broker/cloud outages
 
 ---
 

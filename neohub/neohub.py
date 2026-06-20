@@ -1,11 +1,15 @@
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
+import logging
+from typing import Any, Dict, List, Optional
+
 import requests
 
 DEFAULT_URL = "https://neohub.co.uk/"
 USER_LOGIN_ENDPOINT = "hm_user_login"
 CACHE_VALUE_ENDPOINT = "hm_cache_value"
 DEFAULT_CACHE_VALUE_REQUEST = "engineers,comfort,profile0,timeclock0,system,device_list,timeclock,live_info"
+DEFAULT_REQUEST_TIMEOUT = 20
+_LOGGER = logging.getLogger(__name__)
 
 @dataclass
 class Device:
@@ -111,10 +115,11 @@ class LiveInfoDevice:
         return cls(**known_fields)
 
 class NeoHub:
-    def __init__(self, username: str, password: str, url: Optional[str] = None):
+    def __init__(self, username: str, password: str, url: Optional[str] = None, request_timeout: float = DEFAULT_REQUEST_TIMEOUT):
         self.username = username
         self.password = password
         self.url = self._normalise_url(url or DEFAULT_URL)
+        self.request_timeout = request_timeout
         self.token = None
         self.session = requests.Session()
 
@@ -160,7 +165,7 @@ class NeoHub:
                 try:
                     devices.append(LiveInfoDevice.from_dict(device_data))
                 except Exception as e:
-                    print(f"Warning: Failed to parse device data: {e}")
+                    _LOGGER.warning("Failed to parse NeoHub live device data: %s", e)
             response['CACHE_VALUE']['live_info']['devices'] = devices
 
         return response
@@ -234,6 +239,6 @@ class NeoHub:
     def _form_post_request(self, endpoint: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """Make a form POST request to the API."""
         url = f"{self.url}{endpoint}"
-        response = self.session.post(url, data=params)
+        response = self.session.post(url, data=params, timeout=self.request_timeout)
         response.raise_for_status()
         return response.json()

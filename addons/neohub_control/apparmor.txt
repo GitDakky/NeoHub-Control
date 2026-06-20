@@ -1,0 +1,36 @@
+#include <tunables/global>
+
+profile neohub_control flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/ssl_certs>
+
+  # Runtime requirements: outbound HTTPS to NeoHub and MQTT to the broker.
+  network inet stream,
+  network inet6 stream,
+
+  # S6 and process signalling.
+  signal (send) set=(kill,term,int,hup,cont),
+  /init ix,
+  /bin/** ix,
+  /usr/bin/** ix,
+  /usr/local/bin/** ix,
+  /etc/services.d/** rix,
+  /etc/s6-overlay/** rix,
+  /run/{s6,s6-rc*,service}/** rwix,
+  /package/** rix,
+  /command/** ix,
+
+  # Add-on application and configuration.
+  /opt/neohub-control/** rix,
+  /data/** r,
+
+  # Python/runtime scratch space.
+  /tmp/** rw,
+  /dev/null rw,
+  /dev/urandom r,
+
+  # No host/system mutation required.
+  deny /proc/** wklx,
+  deny /sys/** wklx,
+}

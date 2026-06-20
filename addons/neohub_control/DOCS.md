@@ -61,7 +61,15 @@ mqtt:
 
 ### MQTT authentication
 
-Version `0.2.0` reads the Supervisor MQTT service (`mqtt:need`) and uses the generated add-on credentials from Mosquitto automatically. This avoids the common failure where `core-mosquitto` rejects anonymous/blank MQTT logins and no discovery entities appear.
+Version `0.2.4` declares minimal Supervisor API access for the MQTT service (`mqtt:need`) and uses the generated add-on credentials from Mosquitto automatically. This avoids the common failure where `core-mosquitto` rejects anonymous/blank MQTT logins and no discovery entities appear.
+
+## Home Assistant packaging and security
+
+- The add-on uses the official pinned Home Assistant Python base image.
+- `config.yaml` points to the pre-built `ghcr.io/gitdakky/neohub-control` image; Home Assistant no longer needs to build the container locally.
+- CI uses the current Home Assistant builder actions to validate pull requests and publish `aarch64`/`amd64` images from `master`.
+- The add-on keeps protection mode compatible defaults: no host networking, no privileged mode, no device mounts, and no `/share` write mapping.
+- An `apparmor.txt` profile is included as a second line of defence for the Python bridge.
 
 ## Dashboard included
 

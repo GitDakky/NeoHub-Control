@@ -4,13 +4,17 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+    requirements = []
+    for line in fh:
+        requirement = line.split("#", 1)[0].strip()
+        if requirement:
+            requirements.append(requirement)
 
 setup(
     name="neohub-control",
-    version="1.0.0",
+    version="0.2.4",
     author="DAK",
-    description="A Streamlit dashboard for controlling NeoHub heating systems",
+    description="MQTT bridge and Home Assistant add-on for Heatmiser NeoHub systems",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/GitDakky/NeoHub-Control",
@@ -24,7 +28,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "neohub-control=app:main",
+            "neohub-control=cli:main",
         ],
     },
 )

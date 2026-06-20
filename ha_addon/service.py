@@ -172,8 +172,15 @@ class PahoMQTTAdapter:
             _LOGGER.info("Connected to MQTT broker")
         self._connected.set()
 
-    def _on_disconnect(self, _client: Any, _userdata: Any, reason_code: Any = None, _properties: Any = None) -> None:
-        if reason_code not in (None, 0):
+    def _on_disconnect(self, _client: Any, _userdata: Any, *args: Any) -> None:
+        """Handle both paho-mqtt 1.x and 2.x disconnect callback signatures."""
+        reason_code = None
+        if len(args) == 1:
+            reason_code = args[0]
+        elif len(args) >= 2:
+            reason_code = args[1]
+        code = getattr(reason_code, "value", reason_code)
+        if code not in (None, 0):
             _LOGGER.warning("Disconnected from MQTT broker: %s", reason_code)
         self._connected.clear()
 
@@ -631,22 +638,36 @@ def _supervisor_mqtt_settings() -> MQTTSettings | None:
     )
 
 
+def _option_or_env(options: dict[str, Any], key: str, env_var: str, default: Any = None) -> Any:
+    """Return a non-empty option value, otherwise fall back to the environment."""
+    value = options.get(key)
+    if value not in (None, ""):
+        return value
+    return os.environ.get(env_var, default)
+
+
 def _mqtt_settings_from_options(options: dict[str, Any]) -> MQTTSettings:
     mqtt_options = options.get("mqtt") or {}
-    has_explicit_auth = bool(mqtt_options.get("username") or os.environ.get("MQTT_USERNAME"))
-    has_explicit_host = bool(mqtt_options.get("host") or os.environ.get("MQTT_HOST"))
-    if not has_explicit_auth:
+    explicit_host = _option_or_env(mqtt_options, "host", "MQTT_HOST", "")
+    explicit_username = _option_or_env(mqtt_options, "username", "MQTT_USERNAME", "")
+    explicit_password = _option_or_env(mqtt_options, "password", "MQTT_PASSWORD", "")
+    has_explicit_auth = bool(explicit_username)
+    has_explicit_host = bool(explicit_host)
+    # Explicit host takes priority over Supervisor MQTT — an unauthenticated
+    # external broker is a valid configuration.
+    if not has_explicit_host and not has_explicit_auth:
         supervisor_settings = _supervisor_mqtt_settings()
         if supervisor_settings:
             supervisor_settings.client_id = mqtt_options.get("client_id") or "neohub-control-addon"
             return supervisor_settings
+
     return MQTTSettings(
-        host=mqtt_options.get("host") or os.environ.get("MQTT_HOST") or "core-mosquitto",
-        port=int(mqtt_options.get("port") or os.environ.get("MQTT_PORT") or 1883),
-        username=mqtt_options.get("username") or os.environ.get("MQTT_USERNAME"),
-        password=mqtt_options.get("password") or os.environ.get("MQTT_PASSWORD"),
+        host=explicit_host or "core-mosquitto",
+        port=int(_option_or_env(mqtt_options, "port", "MQTT_PORT", 1883)),
+        username=explicit_username or None,
+        password=explicit_password or None,
         client_id=mqtt_options.get("client_id") or "neohub-control-addon",
-        ssl_enabled=_bool(mqtt_options.get("ssl") or os.environ.get("MQTT_SSL") or False),
+        ssl_enabled=_bool(_option_or_env(mqtt_options, "ssl", "MQTT_SSL", False)),
         protocol=mqtt_options.get("protocol") or os.environ.get("MQTT_PROTOCOL"),
         source="explicit-options" if has_explicit_host or has_explicit_auth else "defaults",
     )
